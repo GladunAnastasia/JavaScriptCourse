@@ -6,7 +6,6 @@ const LineByLineReader = require('line-by-line'),
 const data = [];
 let length = 0;
 let str = '';
-let flag = false;
 
 
 lr.on('error', function (err) {
@@ -154,7 +153,7 @@ function countryInfo(arr) {
     }
     console.log();
     console.log('Твиты и страны.');
-    for(let i = 0; i < countryInfo.length; i++) {
+    for(let i = 0; i < 100; i++) {
     	if(countryInfo[i].ownCountry) {
 	        console.log('---' + countryInfo[i].tweetId.trim() +' был опубликован в '+ countryInfo[i].ownCountry.trim());
 	        for(let j = 0; j < countryInfo[i].arrayCountry.length; j++) {
