@@ -97,7 +97,7 @@ function theMostPopularWord(arr) {
         }
         resultArray.sort((a, b) => b.сountParam - a.сountParam);
         resolve(resultArray);
-    }
+    });
 }
 
 function theMostPopularTweet(arr) {
@@ -110,7 +110,7 @@ function theMostPopularTweet(arr) {
         }
         tweetArray.sort((a, b) => b.RTs - a.RTs);
         resolve(tweetArray);
-    }
+    });
 }
 
 function theMostPopularAuthor(arr) {
@@ -121,7 +121,7 @@ function theMostPopularAuthor(arr) {
         }
         tweetArray.sort((a, b) => b.result - a.result);
         resolve(tweetArray);
-    }
+    });
 }
 
 function countryInfo(arr) {
@@ -142,7 +142,7 @@ function countryInfo(arr) {
     	    }
         }
         resolve(countryInfo);
-    }
+    });
 }
 function print(group) {
     console.log();
