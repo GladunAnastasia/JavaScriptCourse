@@ -25,7 +25,7 @@ lr.on('line', function (line) {
         // ...and continue emitting lines.
 
         //Чтобы колонки не съехали
-        let twitCol = 6;
+        let tweetCol = 6;
         str = !str ? str+ ' ' + line : line;
         let tempAr = str.split(';');
         if(tempAr.length == length) {
@@ -33,18 +33,18 @@ lr.on('line', function (line) {
             str = '';
         } else if(tempAr.length > length) {
             let arr = new Array(length);
-            for(let i = 0; i < twitCol; i++) {
+            for(let i = 0; i < tweetCol; i++) {
                 arr[i] = tempAr[i];
             }
-            let j = twitCol + 1;
-            for(let i = tempAr.length - (length - twitCol) + 1; i < tempAr.length; i++) {
+            let j = tweetCol + 1;
+            for(let i = tempAr.length - (length - tweetCol) + 1; i < tempAr.length; i++) {
                 arr[j++] = tempAr[i];
             }
             let str = '';
-            for(let i = twitCol; i < tempAr.length - (length - twitCol) + 1; i++) {
+            for(let i = tweetCol; i < tempAr.length - (length - tweetCol) + 1; i++) {
                 str += ' ' + tempAr[i];
             }
-            arr[twitCol] = str;
+            arr[tweetCol] = str;
             data.push(arr);
         }
         lr.resume();
@@ -60,7 +60,7 @@ lr.on('end', function () {
 function main () {
     let cb = [];
     cb.push(theMostPopularWord);
-    cb.push(theMostPopularTwit);
+    cb.push(theMostPopularTweet);
     cb.push(theMostPopularAuthor);
     cb.push(countryInfo);
     start(data, cb);
@@ -107,31 +107,31 @@ function theMostPopularWord(arr) {
     }
 }
 
-function theMostPopularTwit(arr) {
-    let twitArray = [];
+function theMostPopularTweet(arr) {
+    let tweetArray = [];
     for(let part of arr) {
         if(part[8]) {
-            twitArray.push({twitId:part[0],author:part[3],RTs:part[8]});
+            tweetArray.push({tweetId:part[0],author:part[3],RTs:part[8]});
         }
     }
-    twitArray.sort((a, b) => b.RTs - a.RTs);
+    tweetArray.sort((a, b) => b.RTs - a.RTs);
     console.log();
     console.log('10 наиболее популярных твитов, их авторов и сколько раз они были ретвитнуты.');
-    for(let i = 0; i < twitArray.length && i < 10; i++) {
-        console.log(twitArray[i].twitId.trim() + ", " + twitArray[i].author.trim() + ", " + twitArray[i].RTs);
+    for(let i = 0; i < tweetArray.length && i < 10; i++) {
+        console.log(tweetArray[i].tweetId.trim() + ", " + tweetArray[i].author.trim() + ", " + tweetArray[i].RTs);
     }
 }
 
 function theMostPopularAuthor(arr) {
-    let twitArray = [];
+    let tweetArray = [];
     for(let part of arr) {
-        twitArray.push({author:part[4], RTs:part[8],followers:part[14], result: 2 * Number(!part[8]?0:part[8]) + Number(!part[14]?0:part[14])});
+        tweetArray.push({author:part[4], RTs:part[8],followers:part[14], result: 2 * Number(!part[8]?0:part[8]) + Number(!part[14]?0:part[14])});
     }
-    twitArray.sort((a, b) => b.result - a.result);
+    tweetArray.sort((a, b) => b.result - a.result);
     console.log();
     console.log('10 самых популярных авторов.');
-    for(let i = 0; i < twitArray.length && i < 10; i++) {
-        console.log(twitArray[i].author +', '+ twitArray[i].RTs + ', '+ twitArray[i].followers);
+    for(let i = 0; i < tweetArray.length && i < 10; i++) {
+        console.log(tweetArray[i].author +', '+ tweetArray[i].RTs + ', '+ tweetArray[i].followers);
     }
 }
 
