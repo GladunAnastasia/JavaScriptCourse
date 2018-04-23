@@ -9,7 +9,7 @@ let str = '';
 
 
 lr.on('error', function (err) {
-    
+
 });
 console.log("Начало загрузки: " + new Date());
 lr.on('line', function (line) {
@@ -63,7 +63,7 @@ function main () {
     promises.push(theMostPopularTweet(data));
     promises.push(theMostPopularAuthor(data));
     promises.push(countryInfo(data));
-    Promises.all(promises).then((result) => print(result));
+    Promise.all(promises).then((result) => print(result));
 }
 
 function theMostPopularWord(arr) {
@@ -101,7 +101,7 @@ function theMostPopularWord(arr) {
 }
 
 function theMostPopularTweet(arr) {
-    return  new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         let tweetArray = [];
         for(let part of arr) {
             if(part[8]) {
@@ -114,7 +114,7 @@ function theMostPopularTweet(arr) {
 }
 
 function theMostPopularAuthor(arr) {
-    return  new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         let tweetArray = [];
         for(let part of arr) {
             tweetArray.push({author:part[4], RTs:part[8],followers:part[14], result: 2 * Number(!part[8]?0:part[8]) + Number(!part[14]?0:part[14])});
@@ -125,7 +125,7 @@ function theMostPopularAuthor(arr) {
 }
 
 function countryInfo(arr) {
-    return  new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         let tweetArray = arr;
         let countryInfo = [];
         for(let i = 0; i < tweetArray.length; i++) {
