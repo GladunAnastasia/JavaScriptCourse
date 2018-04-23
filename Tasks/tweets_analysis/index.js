@@ -48,7 +48,7 @@ lr.on('line', function (line) {
             data.push(arr);
         }
         lr.resume();
-    }, 1);
+    }, 100);
 });
 
 lr.on('end', function () {
@@ -58,107 +58,116 @@ lr.on('end', function () {
 });
 
 function main () {
-    let cb = [];
-    cb.push(theMostPopularWord);
-    cb.push(theMostPopularTweet);
-    cb.push(theMostPopularAuthor);
-    cb.push(countryInfo);
-    start(data, cb);
+    let promises = [];
+    promises.push(theMostPopularWord(data));
+    promises.push(theMostPopularTweet(data));
+    promises.push(theMostPopularAuthor(data));
+    promises.push(countryInfo(data));
+    Promises.all(promises).then((result) => print(result));
 }
 
-function start (arr, cb) {
-    for(let callback of cb) {
-        callback(arr);
-    }
-}
 function theMostPopularWord(arr) {
-    let str = '';
-    let temp = 0;
-    for(let part of arr) {
-        if(part[6]) {
-            str += part[6].replace(/http[^\s\t\v\r\n\f]*/gi,' ').replace(/[.,\/!$%\^&\*;:{}=\-_`~()?"'№']/g,' ').replace(/[\s\t\v\r\n\f]+[\d]+[\s\t\v\r\n\f]+/g,' ').replace(/[\s]+[#]+[\s]+/g,' ').replace(/(RT)(\s)/g,' ');
+    return new Promise((resolve, reject) => {
+        let str = '';
+        let temp = 0;
+        for(let part of arr) {
+            if(part[6]) {
+                str += part[6].replace(/http[^\s\t\v\r\n\f]*/gi,' ').replace(/[.,\/!$%\^&\*;:{}=\-_`~()?"'№']/g,' ').replace(/[\s\t\v\r\n\f]+[\d]+[\s\t\v\r\n\f]+/g,' ').replace(/[\s]+[#]+[\s]+/g,' ').replace(/(RT)(\s)/g,' ');
+            }
         }
-    }
-    let array = str.split(' ');
-    let resultArray = [];
-    let element;    
-    let сount;
-    for(let i = 0; i < array.length; i++) {
-        if(!array[i]) {
-            continue;
+        let array = str.split(' ');
+        let resultArray = [];
+        let element;    
+        let сount;
+        for(let i = 0; i < array.length; i++) {
+            if(!array[i]) {
+                continue;
+            }
+            let j = i + 1;
+            сount = 0;
+            let inx;
+            while((inx = array.indexOf(array[i], j)) >= 0) {
+                j = inx;
+                array[j] = undefined;
+                сount++;
+            }
+            element = array[i];
+            resultArray.push({value:element,сountParam:сount});
+            array[i] = undefined;
         }
-        let j = i + 1;
-        сount = 0;
-        let inx;
-        while((inx = array.indexOf(array[i], j)) >= 0) {
-            j = inx;
-            array[j] = undefined;
-            сount++;
-        }
-        element = array[i];
-        resultArray.push({value:element,сountParam:сount});
-        array[i] = undefined;
-    }
-    resultArray.sort((a, b) => b.сountParam - a.сountParam);
-    console.log();
-    console.log('10 наиболее часто встречающихся слов.');
-    for(let i = 0; i < resultArray.length && i < 10; i++) {
-        console.log(resultArray[i].value + " : " + resultArray[i].сountParam);
+        resultArray.sort((a, b) => b.сountParam - a.сountParam);
+        resolve(resultArray);
     }
 }
 
 function theMostPopularTweet(arr) {
-    let tweetArray = [];
-    for(let part of arr) {
-        if(part[8]) {
-            tweetArray.push({tweetId:part[0],author:part[3],RTs:part[8]});
+    return  new Promise((resolve, reject) => {
+        let tweetArray = [];
+        for(let part of arr) {
+            if(part[8]) {
+                tweetArray.push({tweetId:part[0],author:part[3],RTs:part[8]});
+            }
         }
-    }
-    tweetArray.sort((a, b) => b.RTs - a.RTs);
-    console.log();
-    console.log('10 наиболее популярных твитов, их авторов и сколько раз они были ретвитнуты.');
-    for(let i = 0; i < tweetArray.length && i < 10; i++) {
-        console.log(tweetArray[i].tweetId.trim() + ", " + tweetArray[i].author.trim() + ", " + tweetArray[i].RTs);
+        tweetArray.sort((a, b) => b.RTs - a.RTs);
+        resolve(tweetArray);
     }
 }
 
 function theMostPopularAuthor(arr) {
-    let tweetArray = [];
-    for(let part of arr) {
-        tweetArray.push({author:part[4], RTs:part[8],followers:part[14], result: 2 * Number(!part[8]?0:part[8]) + Number(!part[14]?0:part[14])});
-    }
-    tweetArray.sort((a, b) => b.result - a.result);
-    console.log();
-    console.log('10 самых популярных авторов.');
-    for(let i = 0; i < tweetArray.length && i < 10; i++) {
-        console.log(tweetArray[i].author +', '+ tweetArray[i].RTs + ', '+ tweetArray[i].followers);
+    return  new Promise((resolve, reject) => {
+        let tweetArray = [];
+        for(let part of arr) {
+            tweetArray.push({author:part[4], RTs:part[8],followers:part[14], result: 2 * Number(!part[8]?0:part[8]) + Number(!part[14]?0:part[14])});
+        }
+        tweetArray.sort((a, b) => b.result - a.result);
+        resolve(tweetArray);
     }
 }
 
 function countryInfo(arr) {
-    let tweetArray = arr;
-    let countryInfo = [];
-    for(let i = 0; i < tweetArray.length; i++) {
-    	if(tweetArray[i] && tweetArray[i][6].indexOf('RT ') != 0) {
-    		let ob = {tweetId:tweetArray[i][0], nickName:tweetArray[i][4], ownCountry:tweetArray[i][11], arrayCountry : []};
-	        for(let j = i + 1; j < tweetArray.length; j++) {
-	        	if(tweetArray[j] && tweetArray[j][6].indexOf('RT @' + ob.nickName) == 0 && tweetArray[j][6].indexOf(tweetArray[i][6])>0) {
-	        		ob.arrayCountry.push({tweetId:tweetArray[j][0], ownCountry:tweetArray[j][11]});
-	        		tweetArray[j] = undefined;
-	        	}
-	    	}
-	    	tweetArray[i] = undefined;
-	    	countryInfo.push(ob);
-	    }
+    return  new Promise((resolve, reject) => {
+        let tweetArray = arr;
+        let countryInfo = [];
+        for(let i = 0; i < tweetArray.length; i++) {
+        	if(tweetArray[i] && tweetArray[i][6].indexOf('RT ') != 0) {
+        		let ob = {tweetId:tweetArray[i][0], nickName:tweetArray[i][4], ownCountry:tweetArray[i][11], arrayCountry : []};
+    	        for(let j = i + 1; j < tweetArray.length; j++) {
+    	        	if(tweetArray[j] && tweetArray[j][6].indexOf('RT @' + ob.nickName) == 0 && tweetArray[j][6].indexOf(tweetArray[i][6])>0) {
+    	        		ob.arrayCountry.push({tweetId:tweetArray[j][0], ownCountry:tweetArray[j][11]});
+    	        		tweetArray[j] = undefined;
+    	        	}
+    	    	}
+    	    	tweetArray[i] = undefined;
+    	    	countryInfo.push(ob);
+    	    }
+        }
+        resolve(countryInfo);
+    }
+}
+function print(group) {
+    console.log();
+    console.log('10 наиболее часто встречающихся слов.');
+    for(let i = 0; i < group[0].length && i < 10; i++) {
+        console.log(group[0][i].value + " : " + group[0][i].сountParam);
+    }
+    console.log();
+    console.log('10 наиболее популярных твитов, их авторов и сколько раз они были ретвитнуты.');
+    for(let i = 0; i < group[1].length && i < 10; i++) {
+        console.log(group[1][i].tweetId.trim() + ", " + group[1][i].author.trim() + ", " + group[1][i].RTs);
+    }
+    console.log();
+    console.log('10 самых популярных авторов.');
+    for(let i = 0; i < group[2].length && i < 10; i++) {
+        console.log(group[2][i].author +', '+ group[2][i].RTs + ', '+ group[2][i].followers);
     }
     console.log();
     console.log('Твиты и страны.');
     for(let i = 0; i < 100; i++) {
-    	if(countryInfo[i].ownCountry) {
-	        console.log('---' + countryInfo[i].tweetId.trim() +' был опубликован в '+ countryInfo[i].ownCountry.trim());
-	        for(let j = 0; j < countryInfo[i].arrayCountry.length; j++) {
-		        console.log('-----Ретвитнут с ID: ' + countryInfo[i].arrayCountry[j].tweetId.trim() + countryInfo[i].ownCountry ? ' из '+ countryInfo[i].ownCountry.trim():'');
-		    }
-		}
+        if(group[3][i].ownCountry) {
+            console.log('---' + group[3][i].tweetId.trim() +' был опубликован в '+ group[3][i].ownCountry.trim());
+            for(let j = 0; j < group[3][i].arrayCountry.length; j++) {
+                console.log('-----Ретвитнут с ID: ' + group[3][i].arrayCountry[j].tweetId.trim() + group[3][i].ownCountry ? ' из '+ group[3][i].ownCountry.trim():'');
+            }
+        }
     }
 }
